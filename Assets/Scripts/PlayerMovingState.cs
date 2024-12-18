@@ -3,12 +3,14 @@ using UnityEngine;
 public class PlayerMovingState : LakituState
 {
     private Animator animator;
-    private Vector3 velocity;
+    private Vector3 targetPosition;
+    private float followSpeed = 2.5f;
+    private float heightOffset = 2.0f;
+    private float distanceBehind = 4.0f;
 
     public PlayerMovingState(GameObject lakitu, Transform player) : base(lakitu, player)
     {
         animator = lakitu.GetComponent<Animator>();
-        velocity = Vector3.zero;
     }
 
     public override void Enter()
@@ -18,15 +20,18 @@ public class PlayerMovingState : LakituState
 
     public override void Update()
     {
-        Vector3 targetPosition = player.position - player.forward * 4f + Vector3.up * 2f;
+        Vector3 offset = -player.forward * distanceBehind;
+        targetPosition = new Vector3(player.position.x + offset.x, player.position.y + heightOffset, player.position.z + offset.z);
 
-        lakitu.transform.position = Vector3.SmoothDamp(
+        lakitu.transform.position = Vector3.Lerp(
             lakitu.transform.position,
             targetPosition,
-            ref velocity,
-            0.6f); 
+            Time.deltaTime * followSpeed);
 
-        lakitu.transform.LookAt(player.position);
+        Vector3 lookDirection = player.position - lakitu.transform.position;
+        lookDirection.y = 0;
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+        lakitu.transform.rotation = Quaternion.Slerp(lakitu.transform.rotation, targetRotation, Time.deltaTime * followSpeed);
     }
 
     public override void Exit()
