@@ -3,10 +3,11 @@ using UnityEngine;
 public class PlayerMovingState : LakituState
 {
     private Animator animator;
-    private Vector3 targetPosition;
-    private float followSpeed = 2.5f;
+    private float followSpeed = 5.0f;
     private float heightOffset = 2.0f;
-    private float distanceBehind = 4.0f;
+    private float distanceInFront = 4.0f;
+    private float tiltAngle = 10.0f;
+    private float tiltSpeed = 2.0f;
 
     public PlayerMovingState(GameObject lakitu, Transform player) : base(lakitu, player)
     {
@@ -20,8 +21,7 @@ public class PlayerMovingState : LakituState
 
     public override void Update()
     {
-        Vector3 offset = -player.forward * distanceBehind;
-        targetPosition = new Vector3(player.position.x + offset.x, player.position.y + heightOffset, player.position.z + offset.z);
+        Vector3 targetPosition = player.position + player.forward * distanceInFront + Vector3.up * heightOffset;
 
         lakitu.transform.position = Vector3.Lerp(
             lakitu.transform.position,
@@ -31,7 +31,13 @@ public class PlayerMovingState : LakituState
         Vector3 lookDirection = player.position - lakitu.transform.position;
         lookDirection.y = 0;
         Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
-        lakitu.transform.rotation = Quaternion.Slerp(lakitu.transform.rotation, targetRotation, Time.deltaTime * followSpeed);
+
+        targetRotation *= Quaternion.Euler(tiltAngle, 0, 0);
+
+        lakitu.transform.rotation = Quaternion.Slerp(
+            lakitu.transform.rotation,
+            targetRotation,
+            Time.deltaTime * tiltSpeed);
     }
 
     public override void Exit()

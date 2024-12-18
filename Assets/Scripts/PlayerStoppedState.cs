@@ -15,12 +15,13 @@ public class PlayerStoppedState : LakituState
     public override void Enter()
     {
         animator.SetTrigger("Idle");
-        baseY = lakitu.transform.position.y;
+        baseY = player.position.y + 3.0f;
     }
 
     public override void Update()
     {
-        Vector3 targetPosition = player.position - player.forward * 4f;
+        Vector3 targetPosition = player.position + player.forward * 3f + Vector3.up * 3f;
+
         targetPosition.y = baseY + Mathf.Sin(Time.time * hoverSpeed) * hoverHeight;
 
         lakitu.transform.position = Vector3.Lerp(
@@ -33,6 +34,5 @@ public class PlayerStoppedState : LakituState
 
     public override void Exit()
     {
-
     }
 }
